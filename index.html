@@ -531,13 +531,25 @@
     'Tomato___healthy': { name:'طماطم صحية', emoji:'✅', desc:'النبتة في حالة صحية ممتازة.', symptoms:['أوراق خضراء داكنة لامعة','نمو طبيعي وقوي'], treatments:['الري المنتظم','تسميد متوازن','مراقبة دورية'] },
   };
 
+  function normalizeClassName(s) {
+    return (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
   function getDiseaseInfo(className) {
+    if (!className) return null;
+
+    // مطابقة مباشرة
     if (DISEASES[className]) return DISEASES[className];
+
+    // مطابقة بعد التطبيع (يتعامل مع اختلاف _ / __ / مسافات / حالة الحروف)
+    const normalizedInput = normalizeClassName(className);
     for (const key of Object.keys(DISEASES)) {
-      if (className.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(className.toLowerCase())) {
+      if (normalizeClassName(key) === normalizedInput) {
         return DISEASES[key];
       }
     }
+
+    console.warn('لم يتم العثور على معلومات للمرض:', className);
     return null;
   }
 
