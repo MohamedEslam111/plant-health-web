@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plant Health Checker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-dark:   #1A6B3C;
+      --green-mid:    #2D9B5A;
+      --green-light:  #E8F5EE;
+      --cream:        #F7F9F5;
+      --brown:        #7B4F2E;
+      --yellow:       #F5C842;
+      --red:          #D94F3D;
+      --text-dark:    #1C2B1E;
+      --text-muted:   #6B7F6E;
+      --white:        #FFFFFF;
+      --card-shadow:  0 4px 20px rgba(0,0,0,0.07);
+      --radius:       20px;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--cream);
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      background: var(--white);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-icon {
+      width: 40px; height: 40px;
+      background: var(--green-dark);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .nav-title { font-size: 18px; font-weight: 900; color: var(--text-dark); }
+    .nav-title span { color: var(--green-mid); }
+    .nav-badge {
+      margin-right: auto;
+      background: var(--green-light);
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+      padding: 64px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '🌿';
+      position: absolute;
+      font-size: 200px;
+      opacity: 0.06;
+      top: -20px; left: -20px;
+      transform: rotate(-20deg);
+    }
+    .hero::after {
+      content: '🍃';
+      position: absolute;
+      font-size: 160px;
+      opacity: 0.06;
+      bottom: -20px; right: -20px;
+      transform: rotate(20deg);
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      color: rgba(255,255,255,0.85);
+      font-size: 16px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ── MAIN CARD ── */
+    .main-card {
+      max-width: 680px;
+      margin: -40px auto 48px;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--card-shadow);
+      padding: 36px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* ── DROP ZONE ── */
+    .drop-zone {
+      border: 2.5px dashed #C8DDD0;
+      border-radius: 16px;
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--cream);
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--green-mid);
+      background: var(--green-light);
+    }
+    .drop-zone input[type=file] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .drop-icon {
+      width: 64px; height: 64px;
+      background: var(--green-light);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 16px;
+    }
+    .drop-zone h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .drop-zone p  { font-size: 13px; color: var(--text-muted); }
+
+    /* ── PREVIEW ── */
+    #preview-wrap { display: none; margin-bottom: 20px; }
+    #preview-wrap img {
+      width: 100%;
+      max-height: 320px;
+      object-fit: cover;
+      border-radius: 16px;
+      border: 2.5px solid var(--green-mid);
+    }
+    .change-btn {
+      display: block;
+      text-align: center;
+      margin-top: 10px;
+      color: var(--green-dark);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* ── ANALYZE BUTTON ── */
+    #analyze-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--green-dark);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.2s, opacity 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    #analyze-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    #analyze-btn:not(:disabled):hover { background: #155c32; }
+
+    /* ── LOADING ── */
+    #loading { display: none; text-align: center; padding: 32px 0; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid var(--green-light);
+      border-top-color: var(--green-dark);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading p { font-weight: 600; color: var(--text-muted); }
+
+    /* ── RESULT ── */
+    #result { display: none; }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .status-healthy   { background: #E8F5EE; color: var(--green-dark); }
+    .status-diseased  { background: #FFEEEC; color: var(--red); }
+
+    .result-title { font-size: 28px; font-weight: 900; margin-bottom: 4px; }
+    .result-disease { font-size: 17px; color: var(--text-muted); margin-bottom: 24px; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .info-box {
+      background: var(--cream);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .info-box .label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .info-box .value { font-size: 20px; font-weight: 900; color: var(--green-dark); }
+
+    .confidence-bar-wrap { margin-bottom: 20px; }
+    .confidence-bar-wrap .label {
+      display: flex; justify-content: space-between;
+      font-size: 13px; font-weight: 600; margin-bottom: 6px;
+    }
+    .bar-bg {
+      background: var(--green-light);
+      border-radius: 8px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 8px;
+      background: var(--green-dark);
+      transition: width 0.8s ease;
+    }
+
+    .top5-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+    .top5-item {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 10px;
+    }
+    .rank {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .rank-1 { background: var(--green-dark); color: #fff; }
+    .rank-n  { background: var(--green-light); color: var(--text-muted); }
+    .top5-info { flex: 1; }
+    .top5-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+    .top5-bar-bg {
+      background: var(--green-light);
+      border-radius: 4px;
+      height: 5px;
+      overflow: hidden;
+    }
+    .top5-bar-fill { height: 100%; background: var(--green-mid); border-radius: 4px; }
+    .top5-pct { font-size: 13px; font-weight: 700; color: var(--green-dark); min-width: 52px; text-align: left; }
+
+    .meta-row {
+      display: flex; gap: 16px;
+      font-size: 12px; color: var(--text-muted);
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .meta-row span { display: flex; align-items: center; gap: 4px; }
+
+    .scan-again {
+      width: 100%;
+      padding: 14px;
+      background: var(--green-light);
+      color: var(--green-dark);
+      border: none;
+      border-radius: 14px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: background 0.2s;
+    }
+    .scan-again:hover { background: #d0eadb; }
+
+    /* ── ERROR ── */
+    #error-box {
+      display: none;
+      background: #FFEEEC;
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    #error-box p { font-weight: 600; color: var(--red); }
+
+    /* ── HOW IT WORKS ── */
+    .how-section {
+      max-width: 680px;
+      margin: 0 auto 64px;
+      padding: 0 16px;
+    }
+    .how-section h2 { font-size: 22px; font-weight: 900; margin-bottom: 20px; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .step {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      text-align: center;
+    }
+    .step-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    .step h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .step p  { font-size: 12px; color: var(--text-muted); }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      color: var(--text-muted);
+      border-top: 1px solid #e5ede8;
+    }
+
+    @media (max-width: 600px) {
+      .main-card { margin: -32px 16px 32px; padding: 24px; }
+      .steps { grid-template-columns: 1fr; }
+      .info-grid { grid-template-columns: 1fr 1fr; }
+      .hero { padding: 48px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-icon">🌿</div>
+  <div class="nav-title">Plant Health <span>Checker</span></div>
+  <div class="nav-badge">🔬 ResNet50 AI</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">مدعوم بالذكاء الاصطناعي</div>
+  <h1>اكتشف أمراض نباتاتك<br>في ثوانٍ</h1>
+  <p>صوّر ورقة النبتة وخلّي الـ AI يشخّص لك المرض بدقة عالية</p>
+</div>
+
+<!-- MAIN CARD -->
+<div class="main-card">
+
+  <!-- DROP ZONE -->
+  <div class="drop-zone" id="drop-zone">
+    <input type="file" id="file-input" accept="image/*" />
+    <div class="drop-icon">📷</div>
+    <h3>اسحب صورة هنا أو اضغط لاختيارها</h3>
+    <p>JPEG أو PNG — الصورة بتفضل على جهازك</p>
+  </div>
+
+  <!-- PREVIEW -->
+  <div id="preview-wrap">
+    <img id="preview-img" src="" alt="preview" />
+    <span class="change-btn" onclick="resetAll()">تغيير الصورة</span>
+  </div>
+
+  <!-- ANALYZE BUTTON -->
+  <button id="analyze-btn" disabled onclick="analyze()">
+    🔍 حلّل الصورة
+  </button>
+
+  <!-- LOADING -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p id="loading-msg">جاري رفع الصورة...</p>
+  </div>
+
+  <!-- ERROR -->
+  <div id="error-box">
+    <p id="error-msg">حدث خطأ، حاول مرة أخرى</p>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div id="status-badge" class="status-badge"></div>
+    <div class="result-title" id="result-species"></div>
+    <div class="result-disease" id="result-disease"></div>
+
+    <div class="info-grid">
+      <div class="info-box">
+        <div class="label">نسبة الثقة</div>
+        <div class="value" id="result-confidence"></div>
+      </div>
+      <div class="info-box">
+        <div class="label">وقت التحليل</div>
+        <div class="value" id="result-time"></div>
+      </div>
+    </div>
+
+    <div class="confidence-bar-wrap">
+      <div class="label">
+        <span>مستوى الثقة</span>
+        <span id="bar-label"></span>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill" id="conf-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="top5-title">أعلى 5 احتمالات</div>
+    <div id="top5-list"></div>
+
+    <div class="meta-row">
+      <span>⚡ <span id="result-device"></span></span>
+      <span>🤖 ResNet50</span>
+    </div>
+
+    <button class="scan-again" onclick="resetAll()">🔄 فحص صورة أخرى</button>
+  </div>
+
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+  <h2>كيف يعمل التطبيق؟</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-icon">📸</div>
+      <h3>التقط صورة</h3>
+      <p>صوّر ورقة النبتة بوضوح وإضاءة جيدة</p>
+    </div>
+    <div class="step">
+      <div class="step-icon">🧠</div>
+      <h3>تحليل بالـ AI</h3>
+      <p>ResNet50 يحلل الصورة في ثوانٍ</p>
+    </div>
+    <div class="step">
+      <div class="step-icon">📊</div>
+      <h3>اعرف التشخيص</h3>
+      <p>نوع المرض ونسبة الثقة والبدائل</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Plant Health Checker — مشروع تخرج | مدعوم بـ ResNet50 + FastAPI
+</footer>
+
+<script>
+  const API = 'https://mohamed-eslam-awaad-plant-health-checker.hf.space';
+  let selectedFile = null;
+
+  const dropZone   = document.getElementById('drop-zone');
+  const fileInput  = document.getElementById('file-input');
+  const previewWrap= document.getElementById('preview-wrap');
+  const previewImg = document.getElementById('preview-img');
+  const analyzeBtn = document.getElementById('analyze-btn');
+  const loading    = document.getElementById('loading');
+  const loadingMsg = document.getElementById('loading-msg');
+  const result     = document.getElementById('result');
+  const errorBox   = document.getElementById('error-box');
+  const errorMsg   = document.getElementById('error-msg');
+
+  // Drag & Drop
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) handleFile(fileInput.files[0]);
+  });
+
+  function handleFile(f) {
+    selectedFile = f;
+    const url = URL.createObjectURL(f);
+    previewImg.src = url;
+    dropZone.style.display = 'none';
+    previewWrap.style.display = 'block';
+    analyzeBtn.disabled = false;
+    result.style.display = 'none';
+    errorBox.style.display = 'none';
+  }
+
+  function resetAll() {
+    selectedFile = null;
+    fileInput.value = '';
+    previewImg.src = '';
+    dropZone.style.display = 'block';
+    previewWrap.style.display = 'none';
+    analyzeBtn.disabled = true;
+    result.style.display = 'none';
+    errorBox.style.display = 'none';
+    loading.style.display = 'none';
+    analyzeBtn.style.display = 'flex';
+  }
+
+  async function analyze() {
+    if (!selectedFile) return;
+
+    analyzeBtn.style.display = 'none';
+    loading.style.display = 'block';
+    result.style.display = 'none';
+    errorBox.style.display = 'none';
+
+    loadingMsg.textContent = 'جاري رفع الصورة...';
+    setTimeout(() => { loadingMsg.textContent = 'الموديل بيحلل...'; }, 800);
+
+    try {
+      const fd = new FormData();
+      fd.append('file', selectedFile);
+
+      const res = await fetch(`${API}/predict`, { method: 'POST', body: fd });
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      const data = await res.json();
+
+      showResult(data);
+    } catch (e) {
+      loading.style.display = 'none';
+      analyzeBtn.style.display = 'flex';
+      errorBox.style.display = 'block';
+      errorMsg.textContent = 'حدث خطأ: ' + e.message;
+    }
+  }
+
+  function showResult(d) {
+    loading.style.display = 'none';
+
+    const badge = document.getElementById('status-badge');
+    badge.className = 'status-badge ' + (d.is_healthy ? 'status-healthy' : 'status-diseased');
+    badge.textContent = d.is_healthy ? '✅ النبتة بصحة جيدة' : '⚠️ تم اكتشاف مرض';
+
+    document.getElementById('result-species').textContent = d.plant_species;
+    document.getElementById('result-disease').textContent = d.disease;
+    document.getElementById('result-confidence').textContent = d.confidence_pct;
+    document.getElementById('result-time').textContent = d.inference_time_ms.toFixed(0) + ' ms';
+    document.getElementById('result-device').textContent = d.device_used.toUpperCase();
+    document.getElementById('bar-label').textContent = d.confidence_pct;
+
+    const pct = (d.confidence * 100).toFixed(1);
+    const bar = document.getElementById('conf-bar');
+    bar.style.background = d.confidence > 0.85 ? 'var(--green-dark)' : d.confidence > 0.6 ? 'var(--yellow)' : 'var(--red)';
+    setTimeout(() => { bar.style.width = pct + '%'; }, 50);
+
+    const top5List = document.getElementById('top5-list');
+    top5List.innerHTML = '';
+    d.top5.forEach((item, i) => {
+      const p = parseFloat(item.confidence_pct);
+      top5List.innerHTML += `
+        <div class="top5-item">
+          <div class="rank ${i === 0 ? 'rank-1' : 'rank-n'}">${i + 1}</div>
+          <div class="top5-info">
+            <div class="top5-name">${item.class.replace(/___/g,' — ').replace(/_/g,' ')}</div>
+            <div class="top5-bar-bg"><div class="top5-bar-fill" style="width:${p}%"></div></div>
+          </div>
+          <div class="top5-pct">${item.confidence_pct}</div>
+        </div>`;
+    });
+
+    result.style.display = 'block';
+  }
+</script>
+</body>
+</html>
