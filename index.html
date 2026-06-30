@@ -18,7 +18,6 @@
       --green-mid:    #2D9B5A;
       --green-light:  #E8F5EE;
       --cream:        #F7F9F5;
-      --brown:        #7B4F2E;
       --yellow:       #F5C842;
       --red:          #D94F3D;
       --text-dark:    #1C2B1E;
@@ -35,7 +34,6 @@
       min-height: 100vh;
     }
 
-    /* ── NAVBAR ── */
     nav {
       background: var(--white);
       padding: 16px 32px;
@@ -66,7 +64,6 @@
       border-radius: 20px;
     }
 
-    /* ── HERO ── */
     .hero {
       background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
       padding: 64px 32px;
@@ -114,7 +111,6 @@
       margin: 0 auto;
     }
 
-    /* ── MAIN CARD ── */
     .main-card {
       max-width: 680px;
       margin: -40px auto 48px;
@@ -126,7 +122,6 @@
       z-index: 10;
     }
 
-    /* ── DROP ZONE ── */
     .drop-zone {
       border: 2.5px dashed #C8DDD0;
       border-radius: 16px;
@@ -156,7 +151,6 @@
     .drop-zone h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
     .drop-zone p  { font-size: 13px; color: var(--text-muted); }
 
-    /* ── PREVIEW ── */
     #preview-wrap { display: none; margin-bottom: 20px; }
     #preview-wrap img {
       width: 100%;
@@ -176,7 +170,6 @@
       text-decoration: underline;
     }
 
-    /* ── ANALYZE BUTTON ── */
     #analyze-btn {
       width: 100%;
       padding: 16px;
@@ -195,7 +188,6 @@
     #analyze-btn:disabled { opacity: 0.45; cursor: not-allowed; }
     #analyze-btn:not(:disabled):hover { background: #155c32; }
 
-    /* ── LOADING ── */
     #loading { display: none; text-align: center; padding: 32px 0; }
     .spinner {
       width: 48px; height: 48px;
@@ -208,7 +200,6 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     #loading p { font-weight: 600; color: var(--text-muted); }
 
-    /* ── RESULT ── */
     #result { display: none; }
 
     .status-badge {
@@ -282,6 +273,43 @@
     .top5-bar-fill { height: 100%; background: var(--green-mid); border-radius: 4px; }
     .top5-pct { font-size: 13px; font-weight: 700; color: var(--green-dark); min-width: 52px; text-align: left; }
 
+    .ensemble-title-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 4px;
+    }
+    .ensemble-title { font-size: 15px; font-weight: 700; }
+    .ensemble-badge {
+      margin-right: auto;
+      background: var(--green-light);
+      color: var(--green-dark);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .ensemble-sub {
+      font-size: 11px; color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .model-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      background: var(--cream);
+      border: 1px solid var(--green-light);
+    }
+    .model-row.agree {
+      background: var(--green-light);
+      border-color: var(--green-mid);
+    }
+    .model-icon { font-size: 18px; flex-shrink: 0; }
+    .model-info { flex: 1; min-width: 0; }
+    .model-name { font-size: 12.5px; font-weight: 700; }
+    .model-disease { font-size: 11px; color: var(--text-muted); }
+    .model-pct { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+    .model-row.agree .model-pct { color: var(--green-dark); }
+
     .meta-row {
       display: flex; gap: 16px;
       font-size: 12px; color: var(--text-muted);
@@ -306,7 +334,6 @@
     }
     .scan-again:hover { background: #d0eadb; }
 
-    /* ── ERROR ── */
     #error-box {
       display: none;
       background: #FFEEEC;
@@ -317,7 +344,6 @@
     }
     #error-box p { font-weight: 600; color: var(--red); }
 
-    /* ── HOW IT WORKS ── */
     .how-section {
       max-width: 680px;
       margin: 0 auto 64px;
@@ -339,7 +365,6 @@
     .step h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
     .step p  { font-size: 12px; color: var(--text-muted); }
 
-    /* ── FOOTER ── */
     footer {
       text-align: center;
       padding: 24px;
@@ -358,24 +383,20 @@
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav>
   <div class="nav-icon">🌿</div>
   <div class="nav-title">Plant Health <span>Checker</span></div>
-  <div class="nav-badge">🔬 ResNet50 AI</div>
+  <div class="nav-badge">🔬 4 AI Models Ensemble</div>
 </nav>
 
-<!-- HERO -->
 <div class="hero">
   <div class="hero-badge">🌿 Plant Health Checker</div>
   <h1>اكتشف أمراض نباتاتك<br>في ثوانٍ</h1>
-  <p>صوّر ورقة النبتة وخلّي الـ AI يشخّص لك المرض بدقة عالية</p>
+  <p>صوّر ورقة النبتة وخلّي 4 موديلات AI تشخّص لك المرض بدقة عالية</p>
 </div>
 
-<!-- MAIN CARD -->
 <div class="main-card">
 
-  <!-- DROP ZONE -->
   <div class="drop-zone" id="drop-zone">
     <input type="file" id="file-input" accept="image/*" />
     <div class="drop-icon">📷</div>
@@ -383,29 +404,24 @@
     <p>JPEG أو PNG — الصورة بتفضل على جهازك</p>
   </div>
 
-  <!-- PREVIEW -->
   <div id="preview-wrap">
     <img id="preview-img" src="" alt="preview" />
     <span class="change-btn" onclick="resetAll()">تغيير الصورة</span>
   </div>
 
-  <!-- ANALYZE BUTTON -->
   <button id="analyze-btn" disabled onclick="analyze()">
     🔍 حلّل الصورة
   </button>
 
-  <!-- LOADING -->
   <div id="loading">
     <div class="spinner"></div>
     <p id="loading-msg">جاري رفع الصورة...</p>
   </div>
 
-  <!-- ERROR -->
   <div id="error-box">
     <p id="error-msg">حدث خطأ، حاول مرة أخرى</p>
   </div>
 
-  <!-- RESULT -->
   <div id="result">
     <div id="status-badge" class="status-badge"></div>
     <div class="result-title" id="result-species"></div>
@@ -435,10 +451,19 @@
     <div class="top5-title">أعلى 5 احتمالات</div>
     <div id="top5-list"></div>
 
-    <!-- DISEASE INFO -->
+    <div id="ensemble-box" style="display:none; margin-top:20px;">
+      <div style="background:#fff; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.07); padding:18px;">
+        <div class="ensemble-title-row">
+          <span class="ensemble-title">مقارنة الموديلات</span>
+          <span class="ensemble-badge" id="ensemble-count"></span>
+        </div>
+        <div class="ensemble-sub">النتيجة النهائية محسوبة بـ Soft Voting بين كل الموديلات</div>
+        <div id="ensemble-list"></div>
+      </div>
+    </div>
+
     <div id="disease-info-box" style="display:none; margin-top:20px;">
       <div style="background:#fff; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.07); overflow:hidden;">
-        <!-- Header -->
         <div onclick="toggleDiseaseInfo()" style="padding:18px; cursor:pointer; display:flex; align-items:center; gap:12px;">
           <span id="disease-emoji" style="font-size:24px;"></span>
           <div style="flex:1;">
@@ -447,24 +472,20 @@
           </div>
           <span id="toggle-icon" style="color:#6B7F6E; font-size:20px;">▼</span>
         </div>
-        <!-- Content -->
         <div id="disease-content" style="display:none; padding:0 18px 18px;">
           <hr style="border:none; border-top:1px solid #E8F5EE; margin-bottom:14px;"/>
           <p id="disease-desc" style="font-size:13px; color:#1C2B1E; line-height:1.7; margin-bottom:16px;"></p>
 
-          <!-- Symptoms -->
           <div style="background:#FFF3E0; border-radius:14px; padding:14px; margin-bottom:12px;">
             <div style="font-weight:700; font-size:14px; margin-bottom:10px;">🔍 الأعراض</div>
             <ul id="symptoms-list" style="list-style:none; padding:0; margin:0;"></ul>
           </div>
 
-          <!-- Treatments -->
           <div style="background:#E8F5EE; border-radius:14px; padding:14px; margin-bottom:12px;">
             <div style="font-weight:700; font-size:14px; margin-bottom:10px;">🧪 طرق العلاج</div>
             <ul id="treatments-list" style="list-style:none; padding:0; margin:0;"></ul>
           </div>
 
-          <!-- Warning -->
           <div style="background:#FFF8E1; border-radius:12px; padding:12px; display:flex; gap:8px; align-items:flex-start;">
             <span>⚠️</span>
             <p style="font-size:11px; color:#6B7F6E; line-height:1.5; margin:0;">هذا التشخيص ناتج عن نموذج ذكاء اصطناعي، يُنصح باستشارة مختص زراعي للتأكد.</p>
@@ -475,7 +496,7 @@
 
     <div class="meta-row">
       <span>⚡ <span id="result-device"></span></span>
-      <span>🤖 ResNet50</span>
+      <span>🤖 <span id="result-ensemble-size"></span> موديلات</span>
     </div>
 
     <button class="scan-again" onclick="resetAll()">🔄 فحص صورة أخرى</button>
@@ -483,14 +504,13 @@
 
 </div>
 
-<!-- HOW IT WORKS -->
 <div class="how-section">
   <h2>كيف يعمل التطبيق؟</h2>
   <div class="steps">
     <div class="step">
       <div class="step-icon">🧠</div>
-      <h3>تحليل بالـ AI</h3>
-      <p>ResNet50 يحلل الصورة في ثوانٍ</p>
+      <h3>تحليل بـ 4 موديلات AI</h3>
+      <p>كل موديل يحلل الصورة في ثوانٍ</p>
     </div>
     <div class="step">
       <div class="step-icon">📊</div>
@@ -506,7 +526,7 @@
 </div>
 
 <footer>
-  Plant Health Checker — مشروع تخرج | مدعوم بـ ResNet50 + FastAPI
+  Plant Health Checker — مشروع تخرج | مدعوم بـ 4 موديلات AI + FastAPI
 </footer>
 
 <script>
@@ -537,18 +557,14 @@
 
   function getDiseaseInfo(className) {
     if (!className) return null;
-
-    // مطابقة مباشرة
     if (DISEASES[className]) return DISEASES[className];
 
-    // مطابقة بعد التطبيع (يتعامل مع اختلاف _ / __ / مسافات / حالة الحروف)
     const normalizedInput = normalizeClassName(className);
     for (const key of Object.keys(DISEASES)) {
       if (normalizeClassName(key) === normalizedInput) {
         return DISEASES[key];
       }
     }
-
     console.warn('لم يتم العثور على معلومات للمرض:', className);
     return null;
   }
@@ -576,7 +592,6 @@
   const errorBox   = document.getElementById('error-box');
   const errorMsg   = document.getElementById('error-msg');
 
-  // Drag & Drop
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
   dropZone.addEventListener('drop', e => {
@@ -623,7 +638,7 @@
     errorBox.style.display = 'none';
 
     loadingMsg.textContent = 'جاري رفع الصورة...';
-    setTimeout(() => { loadingMsg.textContent = 'الموديل بيحلل...'; }, 800);
+    setTimeout(() => { loadingMsg.textContent = '4 موديلات بتحلل الصورة...'; }, 800);
 
     try {
       const fd = new FormData();
@@ -655,6 +670,7 @@
     document.getElementById('result-time').textContent = d.inference_time_ms.toFixed(0) + ' ms';
     document.getElementById('result-device').textContent = d.device_used.toUpperCase();
     document.getElementById('bar-label').textContent = d.confidence_pct;
+    document.getElementById('result-ensemble-size').textContent = d.ensemble_size || (d.individual_predictions ? d.individual_predictions.length : '');
 
     const pct = (d.confidence * 100).toFixed(1);
     const bar = document.getElementById('conf-bar');
@@ -676,9 +692,29 @@
         </div>`;
     });
 
-    result.style.display = 'block';
+    const ensembleBox  = document.getElementById('ensemble-box');
+    const ensembleList = document.getElementById('ensemble-list');
+    const ensembleCount = document.getElementById('ensemble-count');
+    if (d.individual_predictions && d.individual_predictions.length > 0) {
+      ensembleCount.textContent = `${d.individual_predictions.length} موديلات`;
+      ensembleList.innerHTML = '';
+      d.individual_predictions.forEach(p => {
+        const agree = p.predicted_class === d.predicted_class;
+        ensembleList.innerHTML += `
+          <div class="model-row ${agree ? 'agree' : ''}">
+            <span class="model-icon">${agree ? '✅' : '⭕'}</span>
+            <div class="model-info">
+              <div class="model-name">${p.model_name}</div>
+              <div class="model-disease">${p.disease}</div>
+            </div>
+            <div class="model-pct">${p.confidence_pct}</div>
+          </div>`;
+      });
+      ensembleBox.style.display = 'block';
+    } else {
+      ensembleBox.style.display = 'none';
+    }
 
-    // Disease info
     const info = getDiseaseInfo(d.predicted_class);
     if (info) {
       document.getElementById('disease-emoji').textContent = info.emoji;
@@ -690,6 +726,8 @@
       document.getElementById('disease-content').style.display = 'none';
       document.getElementById('toggle-icon').textContent = '▼';
     }
+
+    result.style.display = 'block';
   }
 </script>
 </body>
