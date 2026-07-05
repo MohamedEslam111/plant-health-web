@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Plant Health Checker</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Plant Health">
   <meta name="theme-color" content="#1A6B3C">
@@ -216,6 +215,44 @@
     .result-title { font-size: 28px; font-weight: 900; margin-bottom: 4px; }
     .result-disease { font-size: 17px; color: var(--text-muted); margin-bottom: 24px; }
 
+    /* ── Heatmap section ── */
+    .heatmap-section {
+      display: none;
+      margin-bottom: 20px;
+    }
+    .heatmap-header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 10px;
+    }
+    .heatmap-header span { font-size: 15px; font-weight: 700; }
+    .heatmap-badge {
+      background: #FFF3E0;
+      color: #E65100;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .heatmap-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+    .heatmap-imgs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .heatmap-imgs img {
+      width: 100%;
+      border-radius: 12px;
+      object-fit: cover;
+      max-height: 200px;
+    }
+    .heatmap-label {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -246,6 +283,14 @@
       border-radius: 8px;
       background: var(--green-dark);
       transition: width 0.8s ease;
+    }
+
+    .section-card {
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      padding: 18px;
+      margin-bottom: 16px;
     }
 
     .top5-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
@@ -358,10 +403,7 @@
       box-shadow: var(--card-shadow);
       text-align: center;
     }
-    .step-icon {
-      font-size: 32px;
-      margin-bottom: 10px;
-    }
+    .step-icon { font-size: 32px; margin-bottom: 10px; }
     .step h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
     .step p  { font-size: 12px; color: var(--text-muted); }
 
@@ -378,6 +420,7 @@
       .steps { grid-template-columns: 1fr; }
       .info-grid { grid-template-columns: 1fr 1fr; }
       .hero { padding: 48px 20px; }
+      .heatmap-imgs { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -429,7 +472,7 @@
 
     <div class="info-grid">
       <div class="info-box">
-        <div class="label">نسبة الثقة</div>
+        <div class="label">نسبة الثقة (Ensemble)</div>
         <div class="value" id="result-confidence"></div>
       </div>
       <div class="info-box">
@@ -448,48 +491,65 @@
       </div>
     </div>
 
-    <div class="top5-title">أعلى 5 احتمالات</div>
-    <div id="top5-list"></div>
+    <!-- ── Ensemble Comparison ── -->
+    <div id="ensemble-box" class="section-card" style="display:none;">
+      <div class="ensemble-title-row">
+        <span class="ensemble-title">مقارنة الموديلات الأربعة</span>
+        <span class="ensemble-badge" id="ensemble-count"></span>
+      </div>
+      <div class="ensemble-sub">النتيجة النهائية محسوبة بـ Soft Voting بين كل الموديلات</div>
+      <div id="ensemble-list"></div>
+    </div>
 
-    <div id="ensemble-box" style="display:none; margin-top:20px;">
-      <div style="background:#fff; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.07); padding:18px;">
-        <div class="ensemble-title-row">
-          <span class="ensemble-title">مقارنة الموديلات</span>
-          <span class="ensemble-badge" id="ensemble-count"></span>
+    <!-- ── GradCAM Heatmap ── -->
+    <div id="heatmap-section" class="section-card heatmap-section">
+      <div class="heatmap-header">
+        <span>🔥 خريطة الحرارة</span>
+        <span class="heatmap-badge">GradCAM</span>
+      </div>
+      <div class="heatmap-sub">المناطق الحمراء هي الأجزاء اللي الموديل ركّز عليها في التشخيص</div>
+      <div class="heatmap-imgs">
+        <div>
+          <img id="original-img-result" src="" alt="الصورة الأصلية" />
+          <div class="heatmap-label">الصورة الأصلية</div>
         </div>
-        <div class="ensemble-sub">النتيجة النهائية محسوبة بـ Soft Voting بين كل الموديلات</div>
-        <div id="ensemble-list"></div>
+        <div>
+          <img id="heatmap-img" src="" alt="خريطة الحرارة" />
+          <div class="heatmap-label">GradCAM Overlay</div>
+        </div>
       </div>
     </div>
 
-    <div id="disease-info-box" style="display:none; margin-top:20px;">
-      <div style="background:#fff; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.07); overflow:hidden;">
-        <div onclick="toggleDiseaseInfo()" style="padding:18px; cursor:pointer; display:flex; align-items:center; gap:12px;">
-          <span id="disease-emoji" style="font-size:24px;"></span>
-          <div style="flex:1;">
-            <div style="font-size:12px; color:#6B7F6E;">معلومات عن المرض</div>
-            <div id="disease-name" style="font-size:15px; font-weight:700; color:#1C2B1E;"></div>
-          </div>
-          <span id="toggle-icon" style="color:#6B7F6E; font-size:20px;">▼</span>
+    <!-- ── Top 5 ── -->
+    <div class="section-card">
+      <div class="top5-title">أعلى 5 احتمالات</div>
+      <div id="top5-list"></div>
+    </div>
+
+    <!-- ── Disease Info ── -->
+    <div id="disease-info-box" style="display:none;" class="section-card">
+      <div onclick="toggleDiseaseInfo()" style="cursor:pointer; display:flex; align-items:center; gap:12px;">
+        <span id="disease-emoji" style="font-size:24px;"></span>
+        <div style="flex:1;">
+          <div style="font-size:12px; color:#6B7F6E;">معلومات عن المرض</div>
+          <div id="disease-name" style="font-size:15px; font-weight:700; color:#1C2B1E;"></div>
         </div>
-        <div id="disease-content" style="display:none; padding:0 18px 18px;">
-          <hr style="border:none; border-top:1px solid #E8F5EE; margin-bottom:14px;"/>
-          <p id="disease-desc" style="font-size:13px; color:#1C2B1E; line-height:1.7; margin-bottom:16px;"></p>
-
-          <div style="background:#FFF3E0; border-radius:14px; padding:14px; margin-bottom:12px;">
-            <div style="font-weight:700; font-size:14px; margin-bottom:10px;">🔍 الأعراض</div>
-            <ul id="symptoms-list" style="list-style:none; padding:0; margin:0;"></ul>
-          </div>
-
-          <div style="background:#E8F5EE; border-radius:14px; padding:14px; margin-bottom:12px;">
-            <div style="font-weight:700; font-size:14px; margin-bottom:10px;">🧪 طرق العلاج</div>
-            <ul id="treatments-list" style="list-style:none; padding:0; margin:0;"></ul>
-          </div>
-
-          <div style="background:#FFF8E1; border-radius:12px; padding:12px; display:flex; gap:8px; align-items:flex-start;">
-            <span>⚠️</span>
-            <p style="font-size:11px; color:#6B7F6E; line-height:1.5; margin:0;">هذا التشخيص ناتج عن نموذج ذكاء اصطناعي، يُنصح باستشارة مختص زراعي للتأكد.</p>
-          </div>
+        <span id="toggle-icon" style="color:#6B7F6E; font-size:20px;">▼</span>
+      </div>
+      <div id="disease-content" style="display:none; margin-top:14px;">
+        <hr style="border:none; border-top:1px solid #E8F5EE; margin-bottom:14px;"/>
+        <p id="disease-desc" style="font-size:13px; color:#1C2B1E; line-height:1.7; margin-bottom:16px;"></p>
+        <div style="background:#FFF3E0; border-radius:14px; padding:14px; margin-bottom:12px;">
+          <div style="font-weight:700; font-size:14px; margin-bottom:10px;">🔍 الأعراض</div>
+          <ul id="symptoms-list" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+        <div style="background:#E8F5EE; border-radius:14px; padding:14px; margin-bottom:12px;">
+          <div style="font-weight:700; font-size:14px; margin-bottom:10px;">🧪 طرق العلاج</div>
+          <ul id="treatments-list" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+        <div style="background:#FFF8E1; border-radius:12px; padding:12px; display:flex; gap:8px; align-items:flex-start;">
+          <span>⚠️</span>
+          <p style="font-size:11px; color:#6B7F6E; line-height:1.5; margin:0;">هذا التشخيص ناتج عن نموذج ذكاء اصطناعي، يُنصح باستشارة مختص زراعي للتأكد.</p>
         </div>
       </div>
     </div>
@@ -532,6 +592,7 @@
 <script>
   const API = 'https://mohamed-eslam-awaad-plant-health-checker.hf.space';
   let selectedFile = null;
+  let originalImageUrl = null;
 
   const DISEASES = {
     'Pepper__bell___Bacterial_spot': { name:'التبقع البكتيري في الفلفل', emoji:'🫑', desc:'مرض بكتيري يصيب أوراق وثمار الفلفل، يسببه بكتيريا Xanthomonas.', symptoms:['بقع مائية صغيرة على الأوراق تتحول للبني الداكن','حواف البقع صفراء اللون','تساقط الأوراق المصابة','بقع بارزة على الثمار'], treatments:['إزالة الأوراق والثمار المصابة فوراً','تجنب الري بالرش على الأوراق','رش مبيدات نحاسية (كبريتات النحاس)','تحسين التهوية بين النباتات'] },
@@ -558,39 +619,31 @@
   function getDiseaseInfo(className) {
     if (!className) return null;
     if (DISEASES[className]) return DISEASES[className];
-
-    const normalizedInput = normalizeClassName(className);
+    const norm = normalizeClassName(className);
     for (const key of Object.keys(DISEASES)) {
-      if (normalizeClassName(key) === normalizedInput) {
-        return DISEASES[key];
-      }
+      if (normalizeClassName(key) === norm) return DISEASES[key];
     }
-    console.warn('لم يتم العثور على معلومات للمرض:', className);
     return null;
   }
 
   function toggleDiseaseInfo() {
     const content = document.getElementById('disease-content');
     const icon = document.getElementById('toggle-icon');
-    if (content.style.display === 'none') {
-      content.style.display = 'block';
-      icon.textContent = '▲';
-    } else {
-      content.style.display = 'none';
-      icon.textContent = '▼';
-    }
+    const shown = content.style.display !== 'none';
+    content.style.display = shown ? 'none' : 'block';
+    icon.textContent = shown ? '▼' : '▲';
   }
 
-  const dropZone   = document.getElementById('drop-zone');
-  const fileInput  = document.getElementById('file-input');
-  const previewWrap= document.getElementById('preview-wrap');
-  const previewImg = document.getElementById('preview-img');
-  const analyzeBtn = document.getElementById('analyze-btn');
-  const loading    = document.getElementById('loading');
-  const loadingMsg = document.getElementById('loading-msg');
-  const result     = document.getElementById('result');
-  const errorBox   = document.getElementById('error-box');
-  const errorMsg   = document.getElementById('error-msg');
+  const dropZone    = document.getElementById('drop-zone');
+  const fileInput   = document.getElementById('file-input');
+  const previewWrap = document.getElementById('preview-wrap');
+  const previewImg  = document.getElementById('preview-img');
+  const analyzeBtn  = document.getElementById('analyze-btn');
+  const loading     = document.getElementById('loading');
+  const loadingMsg  = document.getElementById('loading-msg');
+  const result      = document.getElementById('result');
+  const errorBox    = document.getElementById('error-box');
+  const errorMsg    = document.getElementById('error-msg');
 
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
@@ -600,15 +653,14 @@
     const f = e.dataTransfer.files[0];
     if (f) handleFile(f);
   });
-
   fileInput.addEventListener('change', () => {
     if (fileInput.files[0]) handleFile(fileInput.files[0]);
   });
 
   function handleFile(f) {
     selectedFile = f;
-    const url = URL.createObjectURL(f);
-    previewImg.src = url;
+    originalImageUrl = URL.createObjectURL(f);
+    previewImg.src = originalImageUrl;
     dropZone.style.display = 'none';
     previewWrap.style.display = 'block';
     analyzeBtn.disabled = false;
@@ -618,6 +670,7 @@
 
   function resetAll() {
     selectedFile = null;
+    originalImageUrl = null;
     fileInput.value = '';
     previewImg.src = '';
     dropZone.style.display = 'block';
@@ -627,6 +680,7 @@
     errorBox.style.display = 'none';
     loading.style.display = 'none';
     analyzeBtn.style.display = 'flex';
+    document.getElementById('heatmap-section').style.display = 'none';
   }
 
   async function analyze() {
@@ -639,6 +693,7 @@
 
     loadingMsg.textContent = 'جاري رفع الصورة...';
     setTimeout(() => { loadingMsg.textContent = '4 موديلات بتحلل الصورة...'; }, 800);
+    setTimeout(() => { loadingMsg.textContent = 'جاري توليد خريطة الحرارة...'; }, 4000);
 
     try {
       const fd = new FormData();
@@ -660,6 +715,7 @@
   function showResult(d) {
     loading.style.display = 'none';
 
+    // Status
     const badge = document.getElementById('status-badge');
     badge.className = 'status-badge ' + (d.is_healthy ? 'status-healthy' : 'status-diseased');
     badge.textContent = d.is_healthy ? '✅ النبتة بصحة جيدة' : '⚠️ تم اكتشاف مرض';
@@ -672,11 +728,51 @@
     document.getElementById('bar-label').textContent = d.confidence_pct;
     document.getElementById('result-ensemble-size').textContent = d.ensemble_size || (d.individual_predictions ? d.individual_predictions.length : '');
 
+    // Confidence bar
     const pct = (d.confidence * 100).toFixed(1);
     const bar = document.getElementById('conf-bar');
     bar.style.background = d.confidence > 0.85 ? 'var(--green-dark)' : d.confidence > 0.6 ? 'var(--yellow)' : 'var(--red)';
     setTimeout(() => { bar.style.width = pct + '%'; }, 50);
 
+    // Ensemble comparison
+    const ensembleBox  = document.getElementById('ensemble-box');
+    const ensembleList = document.getElementById('ensemble-list');
+    if (d.individual_predictions && d.individual_predictions.length > 0) {
+      document.getElementById('ensemble-count').textContent = `${d.individual_predictions.length} موديلات`;
+      ensembleList.innerHTML = '';
+      d.individual_predictions.forEach(p => {
+        const agree = p.predicted_class === d.predicted_class;
+        ensembleList.innerHTML += `
+          <div class="model-row ${agree ? 'agree' : ''}">
+            <span class="model-icon">${agree ? '✅' : '⭕'}</span>
+            <div class="model-info">
+              <div class="model-name">${p.model_name}</div>
+              <div class="model-disease">${p.disease || p.predicted_class}</div>
+            </div>
+            <div class="model-pct">${p.confidence_pct}</div>
+          </div>`;
+      });
+      ensembleBox.style.display = 'block';
+    } else {
+      ensembleBox.style.display = 'none';
+    }
+
+    // ── GradCAM Heatmap ──
+    const heatmapSection = document.getElementById('heatmap-section');
+    if (d.heatmap_image && d.heatmap_image.length > 0) {
+      // شيل الـ prefix لو موجود وحوّله لـ data URL صح
+      let raw = d.heatmap_image;
+      if (!raw.startsWith('data:')) {
+        raw = 'data:image/jpeg;base64,' + (raw.includes(',') ? raw.split(',').pop() : raw);
+      }
+      document.getElementById('original-img-result').src = originalImageUrl;
+      document.getElementById('heatmap-img').src = raw;
+      heatmapSection.style.display = 'block';
+    } else {
+      heatmapSection.style.display = 'none';
+    }
+
+    // Top 5
     const top5List = document.getElementById('top5-list');
     top5List.innerHTML = '';
     d.top5.forEach((item, i) => {
@@ -692,39 +788,19 @@
         </div>`;
     });
 
-    const ensembleBox  = document.getElementById('ensemble-box');
-    const ensembleList = document.getElementById('ensemble-list');
-    const ensembleCount = document.getElementById('ensemble-count');
-    if (d.individual_predictions && d.individual_predictions.length > 0) {
-      ensembleCount.textContent = `${d.individual_predictions.length} موديلات`;
-      ensembleList.innerHTML = '';
-      d.individual_predictions.forEach(p => {
-        const agree = p.predicted_class === d.predicted_class;
-        ensembleList.innerHTML += `
-          <div class="model-row ${agree ? 'agree' : ''}">
-            <span class="model-icon">${agree ? '✅' : '⭕'}</span>
-            <div class="model-info">
-              <div class="model-name">${p.model_name}</div>
-              <div class="model-disease">${p.disease}</div>
-            </div>
-            <div class="model-pct">${p.confidence_pct}</div>
-          </div>`;
-      });
-      ensembleBox.style.display = 'block';
-    } else {
-      ensembleBox.style.display = 'none';
-    }
-
+    // Disease info
     const info = getDiseaseInfo(d.predicted_class);
     if (info) {
       document.getElementById('disease-emoji').textContent = info.emoji;
       document.getElementById('disease-name').textContent = info.name;
       document.getElementById('disease-desc').textContent = info.desc;
-      document.getElementById('symptoms-list').innerHTML = info.symptoms.map(s => `<li style="padding:3px 0; font-size:13px; line-height:1.6;">• ${s}</li>`).join('');
-      document.getElementById('treatments-list').innerHTML = info.treatments.map(t => `<li style="padding:3px 0; font-size:13px; line-height:1.6;">• ${t}</li>`).join('');
+      document.getElementById('symptoms-list').innerHTML = info.symptoms.map(s => `<li style="padding:3px 0;font-size:13px;line-height:1.6;">• ${s}</li>`).join('');
+      document.getElementById('treatments-list').innerHTML = info.treatments.map(t => `<li style="padding:3px 0;font-size:13px;line-height:1.6;">• ${t}</li>`).join('');
       document.getElementById('disease-info-box').style.display = 'block';
       document.getElementById('disease-content').style.display = 'none';
       document.getElementById('toggle-icon').textContent = '▼';
+    } else {
+      document.getElementById('disease-info-box').style.display = 'none';
     }
 
     result.style.display = 'block';
